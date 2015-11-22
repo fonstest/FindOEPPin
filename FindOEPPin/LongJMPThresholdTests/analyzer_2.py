@@ -36,7 +36,7 @@ def generate_classes(fraction,size):
 	classes.append([cont,int(acc)])
 
 	#print classes
-	print "LEN OF CLASSES " + str(len(classes))
+	#print "LEN OF CLASSES " + str(len(classes))
 	
 
 def insert_in_classes(delta_jmp,fraction,oep_flag):
@@ -59,15 +59,19 @@ def insert_in_classes(delta_jmp,fraction,oep_flag):
 
 # ENTRY POINT			
 
-if len(sys.argv) != 2:
-	print "File name needed"
+if len(sys.argv) != 3:
+	print "analyzer_2.py <input_file> <output_file>"
 	sys.exit(0)
+  	
 try:
+	
 	in_file = open(sys.argv[1],"r")
+	out_file = open(sys.argv[2],"w")
 except IOError:
-	print "File not found"
+	print "Files not found"
 	sys.exit(0)
 
+  
 
 
 # parse the unique write set indexes in the file 
@@ -82,7 +86,7 @@ for line in in_file:
 	if witem_info not in unique_write_set_index:
 		unique_write_set_index.append(witem_info)
 
-print str(unique_write_set_index) + "\n"
+#print str(unique_write_set_index) + "\n"
 
 for witem in unique_write_set_index:
 
@@ -93,7 +97,7 @@ for witem in unique_write_set_index:
 
 	generate_classes(fraction,size)
 
-	print classes 
+	#print classes 
 
 	for line in in_file:
 		splitted = line.strip().split(",") 
@@ -115,22 +119,25 @@ for witem in unique_write_set_index:
 	#print counter_list
 	#print "\n"
 
-	print "Write set size: " + str(size) + "\n"
 
 	k=0
-	print "EIP INDEX"  + str(ep_index)
+  	oep_set = str(-1)+"/100"
+	#print "EIP INDEX"  + str(ep_index)
 	for c in classes:
 		#print k
 		#print c[0]
-		#print "LAST CLASS IS" + str(classes[99])
-		if str(c[0]) == str(ep_index): 
-			print str(int(c[0])+1) +"/100 : " + str(counter_list[k]) + " <-- [x]oep here" + "\n"
-		else:
-			print str(int(c[0])+1) +"/100 : " + str(counter_list[k]) + "\n"
+		#print "eip " + str(ep_index)
+		#print "c[0]" + str(c[0])
+		if str(c[0]) == str(int(ep_index)): 
+                        oep_set = str(int(c[0])+1) +"/100" 
+		out_file.write(str(int(c[0])+1) +"/100 : " + str(counter_list[k]) + "\n")
 
 		k = k+1
 
 
+	out_file.write("Write set size: " + str(size) + "\n")
+  	out_file.write("Oep set: "+oep_set+"\n")
+	out_file.write("---\n\n")
 	counter_list = [0] * 101
 	classes = []
 	ep_index = -1
