@@ -3,6 +3,12 @@ import sys
 
 entry_point = "00401220" # we know this a priori 
 ep_index = -1
+#lenght of the oep jump
+delta_jmp_oep = -1
+#total number of jumps
+number_jmps = 0
+#jumps longer than the oep -1 because we don't want to include the jump to the oep itself
+jmps_greater_oep = -1
 
 scale = 0.01 #scale factor to divide the write-sets size
 classes = []
@@ -100,6 +106,7 @@ for witem in unique_write_set_index:
 	#print classes 
 
 	for line in in_file:
+    		number_jmps += 1
 		splitted = line.strip().split(",") 
 		#print splitted
 		if len(splitted) < 4: # last element is garbage 
@@ -111,6 +118,7 @@ for witem in unique_write_set_index:
 			delta_jmp = int(splitted[2].strip()[12:],10)
 			#print delta_jmp
 			if oep == entry_point:
+        			delta_jmp_oep = delta_jmp
 				insert_in_classes(delta_jmp,fraction,1)
 			else:
 				insert_in_classes(delta_jmp,fraction,0)
@@ -128,8 +136,12 @@ for witem in unique_write_set_index:
 		#print c[0]
 		#print "eip " + str(ep_index)
 		#print "c[0]" + str(c[0])
+		#set the oep_set to the index class which contains the oep
 		if str(c[0]) == str(int(ep_index)): 
-                        oep_set = str(int(c[0])+1) +"/100" 
+                        oep_set = str(int(c[0])+1) +"/100"
+		#track how many jumps greater than the oep jump there are 
+		if ep_index != -1 and c[0] >=  ep_index:
+			jmps_greater_oep += counter_list[k]
 		out_file.write(str(int(c[0])+1) +"/100 : " + str(counter_list[k]) + "\n")
 
 		k = k+1
@@ -137,6 +149,10 @@ for witem in unique_write_set_index:
 
 	out_file.write("Write set size: " + str(size) + "\n")
   	out_file.write("Oep set: "+oep_set+"\n")
+ 	out_file.write("Total number jumps: "+str(number_jmps)+"\n")
+  	out_file.write("Oep jump lenght: "+str(delta_jmp_oep)+"\n")
+	out_file.write("Number of jumps longer than the oep jump: "+str(jmps_greater_oep)+" "+str(jmps_greater_oep*100/float(number_jmps))+"%"+"\n")
+
 	out_file.write("---\n\n")
 	counter_list = [0] * 101
 	classes = []
