@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Pin.h"
+namespace W{
+	#include "windows.h"
+}
 
 
 class ToolHider
