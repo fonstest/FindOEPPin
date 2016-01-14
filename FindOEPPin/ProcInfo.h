@@ -133,7 +133,7 @@ public:
 	VOID addThreadStackAddress(ADDRINT addr);
 	//Memory Mapped Files
 	BOOL isMappedFileAddress(ADDRINT addr);
-	VOID addMappedFilesAddress(ADDRINT startAddr);
+	
 	VOID addInitialMappedFiles();
 	//Library
 	BOOL isLibraryInstruction(ADDRINT address);
@@ -145,7 +145,6 @@ public:
 	//Generic Address (pContexData, SharedMemory..)
 	BOOL isGenericMemoryAddress(ADDRINT address);
 	//Whitelist Memory
-	BOOL isAddrInWhiteList(ADDRINT address);
 	VOID enumerateWhiteListMemory();
 	VOID enumerateCurrentMemory();
 	VOID PrintCurrentMemorydAddr();
@@ -158,7 +157,7 @@ public:
 	void printHeapList();
 	void PrintAllMemory();
 	VOID addProcessHeapsAddress();
-
+	VOID addMappedFilesAddress(ADDRINT startAddr);
 	
 
 	

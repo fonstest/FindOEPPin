@@ -12,6 +12,8 @@ ToolHider::~ToolHider(void)
 
 
 ADDRINT handleRead (ADDRINT eip, ADDRINT read_addr,void *fakeMemH){
+	
+	/*
 	//MYINFO("%0x8 %s Trying to  read %08x : res %d\n",ip,s.c_str(), read_addr,ProcInfo::getInstance()->isAddrInWhiteList(read_addr));
 	FakeMemoryHandler fakeMem = *(FakeMemoryHandler *)fakeMemH;
 	//get the new address of the memory operand (same as before if it is inside the whitelist otherwise a NULL poiter)
@@ -20,9 +22,10 @@ ADDRINT handleRead (ADDRINT eip, ADDRINT read_addr,void *fakeMemH){
 	if(fakeAddr==NULL){
 
 		MYINFO("xxxxxxxxxxxxxx %08x reading %08x",eip,read_addr);
-	
 	}
-	return fakeAddr;
+	
+	*/
+	return read_addr;
 }
 
 
@@ -31,10 +34,12 @@ void ToolHider::avoidEvasion(INS ins){
    ADDRINT curEip = INS_Address(ins);
    ProcInfo *pInfo = ProcInfo::getInstance();
 
+   //MYINFO("Inside RTN: %s\n", RTN_FindNameByAddress(INS_Address(ins)).c_str());
+
 	//Filter instructions inside a known library
-//	if(pInfo->isKnownLibraryInstruction(curEip)){
-//		return;
-//	}
+	if(pInfo->isKnownLibraryInstruction(curEip)){
+		//return;
+	}
 
 	// 1 - single instruction detection
 	if(this->evasionPatcher.patchDispatcher(ins, curEip)){
@@ -52,12 +57,11 @@ void ToolHider::avoidEvasion(INS ins){
 				firstRead=1;
 			}
 		
-				INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)handleRead,IARG_INST_PTR, IARG_MEMORYREAD_EA, IARG_PTR,&fakeMemH, IARG_RETURN_REGS, REG_INST_G0+op, IARG_END);
-				INS_RewriteMemoryOperand(ins, op, REG(REG_INST_G0+op));
-			
+		 INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)handleRead,IARG_INST_PTR, IARG_MEMORYREAD_EA, IARG_PTR,&fakeMemH, IARG_RETURN_REGS, REG_INST_G0, IARG_END);
+	     MYINFO("Instruction for  which we are replacing the operand %s\n" , INS_Disassemble(ins));
+
+		 INS_RewriteMemoryOperand(ins, op, REG(REG_INST_G0));
+				
 		}
     }
-		
-
-	
 }

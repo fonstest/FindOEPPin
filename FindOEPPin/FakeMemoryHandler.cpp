@@ -230,14 +230,15 @@ ADDRINT FakeMemoryHandler::getFakeMemory(ADDRINT address){
 	else{
 		MYINFO("Detected suspicious read at %08x ",address);
 		ProcInfo *p = ProcInfo::getInstance();
-		p->addProcessHeapsAddress();
+		//p->addProcessHeapsAddress();
+		//p->addInitialMappedFiles();
 		if(isAddrInWhiteList(address)){
-			printProcessHeap();
-			p->printHeapList();
+			//printProcessHeap();
+			//p->printHeapList();
 			return address;
 		}
-		printProcessHeap();
-		p->printHeapList();
+		//printProcessHeap();
+		//p->printHeapList();
 		curFakeMemory = "TopoMotoTopoMotoTopoMotoTopoMotoTopoMotoTopoMotoTopoMoto";
 		return NULL;
 	}
