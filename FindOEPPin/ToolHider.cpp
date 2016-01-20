@@ -55,6 +55,7 @@ void ToolHider::avoidEvasion(INS ins){
 	//Filter instructions inside a known library (only graphic dll)
     //  pInfo->isKnownLibraryInstruction(curEip) 
    if(pInfo->isKnownLibraryInstruction(curEip)){
+
 		//MYINFO("That's a GDI\n\n");
 		//MYINFO("Name of RTN is %s\n" , RTN_FindNameByAddress(curEip).c_str());
 		//return;
