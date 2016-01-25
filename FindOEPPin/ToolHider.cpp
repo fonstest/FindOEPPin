@@ -2,7 +2,7 @@
 
 ToolHider::ToolHider(void)
 {
-
+	
 }
 
 
@@ -36,8 +36,6 @@ ADDRINT handleWrite(ADDRINT eip, ADDRINT write_addr,void *fakeWriteH){
 	//get the new address of the memory operand (same as before if it is inside the whitelist otherwise a NULL poiter)
 	ADDRINT fakeAddr = fakeWrite.getFakeWriteAddress(write_addr);
 
-	
-
 
 	if(fakeAddr == NULL){
 		MYINFO("wwwwwwwwwwwwwwww %08x in %s reading %08x",eip, RTN_FindNameByAddress(eip).c_str() , write_addr);
@@ -67,21 +65,23 @@ static REG GetScratchReg(UINT32 index)
     return regs[index];
 }
 
+
 void ToolHider::avoidEvasion(INS ins){
 
    ADDRINT curEip = INS_Address(ins);
    ProcInfo *pInfo = ProcInfo::getInstance();
-
+   FilterHandler *filterHandler = FilterHandler::getInstance();
 
 	//Filter instructions inside a known library (only graphic dll)
     //  pInfo->isKnownLibraryInstruction(curEip) 
-   if(pInfo->isKnownLibraryInstruction(curEip)){
+   if(filterHandler->isFilteredLibraryInstruction(curEip)){
 		//MYINFO("That's a GDI\n\n");
 		//MYINFO("Name of RTN is %s\n" , RTN_FindNameByAddress(curEip).c_str());
-		//return;
+	    //MYINFO("Skipping filtered library code\n");
+		return;
 	}
 
-	//MYINFO("[DEBUG] RTN: %s EIP: %08x INS: %s\n", RTN_FindNameByAddress(curEip).c_str(), curEip , INS_Disassemble(ins).c_str());
+	MYINFO("[DEBUG] RTN: %s EIP: %08x INS: %s\n", RTN_FindNameByAddress(curEip).c_str(), curEip , INS_Disassemble(ins).c_str());
 
 
 	// 1 - single instruction detection
@@ -118,21 +118,8 @@ void ToolHider::avoidEvasion(INS ins){
 		}
     }
 
-
-	//3. memory write filter
 	
-	if(INS_IsMemoryWrite(ins)){
-	
-		INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(handleWrite),
-			IARG_INST_PTR,
-			IARG_MEMORYWRITE_EA, 
-			IARG_PTR, &fakeWriteH,
-			IARG_END);
-	
-	}
-
-
-	/*
+	//3. memory write filter	
 	for (UINT32 op = 0; op<INS_MemoryOperandCount(ins); op++) {
 		if(INS_MemoryOperandIsWritten(ins,op)){
 			//MYINFO("Cur instruction %s ",INS_Disassemble(ins).c_str());
@@ -142,14 +129,14 @@ void ToolHider::avoidEvasion(INS ins){
 			IARG_INST_PTR,
 			IARG_MEMORYOP_EA, op,
 			IARG_PTR, &fakeWriteH,
-			IARG_RETURN_REGS, writeReg,
+			IARG_RETURN_REGS, writeReg, // this is an output param
 			IARG_END);
 				
 			INS_RewriteMemoryOperand(ins, op, writeReg); 
 			
-		}
-		
+		}	
 	}
-	*/
+	
+	
 	
 }

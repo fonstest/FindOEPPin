@@ -1,14 +1,16 @@
 #include "FakeMemoryHandler.h"
 
 
-	typedef struct _MODULEINFO {
+typedef struct _MODULEINFO {
     W::LPVOID lpBaseOfDll;
     W::DWORD  SizeOfImage;
     W::LPVOID EntryPoint;
 	} MODULEINFO, *LPMODULEINFO;
 
-	typedef W::DWORD (WINAPI *MyEnumProcessModules)(W::HANDLE hProcess, W::HMODULE *lphModule, W::DWORD cb, W::LPDWORD lpcbNeeded);
-	typedef W::DWORD (WINAPI *MyGetModuleInformation)(W::HANDLE hProcess, W::HMODULE HModule, LPMODULEINFO module_info, W::DWORD  cb);
+typedef W::DWORD (WINAPI *MyEnumProcessModules)(W::HANDLE hProcess, W::HMODULE *lphModule, W::DWORD cb, W::LPDWORD lpcbNeeded);
+typedef W::DWORD (WINAPI *MyGetModuleInformation)(W::HANDLE hProcess, W::HMODULE HModule, LPMODULEINFO module_info, W::DWORD  cb);
+
+
 
 FakeMemoryHandler::FakeMemoryHandler(void)
 {
@@ -220,6 +222,10 @@ BOOL FakeMemoryHandler::CheckInCurrentDlls(UINT32 address_to_check){
 	//MYINFO("Calling current dlls");
 	
 	W::HMODULE hMods[1024];
+	char Buffer[2048];
+
+	W::LPTSTR pBuffer = Buffer;
+
     W::DWORD cbNeeded;
 	BOOL isDll = FALSE;
 
@@ -227,28 +233,29 @@ BOOL FakeMemoryHandler::CheckInCurrentDlls(UINT32 address_to_check){
 	MyEnumProcessModules enumProcessModules = NULL;
 	MyGetModuleInformation getModuleInformation = NULL;
 
-	
-	hPsapi = W::LoadLibraryA("psapi.dll");
 
-	
+	hPsapi = W::LoadLibraryA("psapi.dll");
+	W::HANDLE process = W::GetCurrentProcess(); 
+
+	MODULEINFO mi;
+
 	enumProcessModules = (MyEnumProcessModules) W::GetProcAddress(hPsapi, "EnumProcessModules");
 	getModuleInformation= (MyGetModuleInformation) W::GetProcAddress(hPsapi,"GetModuleInformation");
 
-	//MYINFO("enumProcess address %08x ",enumProcessModules);
-	
-	W::HANDLE process = W::GetCurrentProcess(); 
-	MODULEINFO mi;
-	
-	
+
 	if( enumProcessModules(process, hMods, sizeof(hMods), &cbNeeded))
     {
         for (int  i = 0; i < (cbNeeded / sizeof(W::HMODULE)); i++ )
         {
-            getModuleInformation(process,hMods[i], &mi,sizeof(mi));
 
+            getModuleInformation(process,hMods[i], &mi,sizeof(mi));
+		    GetModuleFileNameA(hMods[i], pBuffer,sizeof(Buffer));
+			
+			//MYINFO("I've added %s to the list of know libary\n", Buffer);
 			UINT32 end_addr = (UINT32)mi.lpBaseOfDll + mi.SizeOfImage;
 
-		    //MYINFO("Module found at %08x - %08x\n" , mi.lpBaseOfDll , end_addr);
+		   // MYINFO("Module %s found at %08x - %08x\n" , Buffer , mi.lpBaseOfDll , end_addr);
+			
 			ProcInfo *p = ProcInfo::getInstance();
 			BOOL isMain = FALSE;
 
@@ -261,7 +268,14 @@ BOOL FakeMemoryHandler::CheckInCurrentDlls(UINT32 address_to_check){
 			}
 
 			if(!isMain){
-				p->addLibrary("NoNameForNow",(UINT32)mi.lpBaseOfDll,end_addr);
+				p->addLibrary(Buffer,(UINT32)mi.lpBaseOfDll,end_addr);		
+			}
+
+			FilterHandler *filterHandler = FilterHandler::getInstance();
+
+			if(filterHandler->IsNameInFilteredArray(Buffer)){
+				MYINFO("Added to the filtered array the module %s\n" , Buffer);
+				filterHandler->addToFilteredLibrary(Buffer,(UINT32)mi.lpBaseOfDll,end_addr);
 			}
 
 			if(address_to_check >= (UINT32)mi.lpBaseOfDll && address_to_check <= end_addr){
@@ -305,20 +319,22 @@ ADDRINT FakeMemoryHandler::getFakeMemory(ADDRINT address){
 		//MYINFO("Detected suspicious read at %08x ",address);
 		ProcInfo *p = ProcInfo::getInstance();
 
-		
-		//********************** POC **********************
-		p->addProcessHeapsAddress();
+		// here the whitelist is updated and we check also if the address is inside the new discovere heaps
+		if(p->addProcessHeapsAndCheckAddress(address)){
+
+			//MYINFO("@@@@@@Calling addProcessHeapAndCheckAddress\n");
+			return address;
+		}	  
 
 		//p->setCurrentMappedFiles();
-
+		/*
 		if(isAddrInWhiteList(address)){
 			//printProcessHeap();
 			//p->printHeapList();
 			return address;
 		}
+		*/
 
-
-		//********************** POC **********************
 		//printProcessHeap();
 		//p->printHeapList();
 		if(CheckInCurrentDlls(address)){

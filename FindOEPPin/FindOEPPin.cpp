@@ -10,6 +10,8 @@
 #include "FilterHandler.h"
 #include "HookFunctions.h"
 #include "HookSyscalls.h"
+
+
 namespace W {
 	#include <windows.h>
 
@@ -31,9 +33,14 @@ VOID Fini(INT32 code, VOID *v){
 	MYINFO("WRITE SET SIZE: %d", wxorxHandler->getWritesSet().size());
 	//DEBUG --- get the execution time
 	MYINFO("Total execution Time: %.2fs", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+
+	//ProcInfo *proc_info = ProcInfo::getInstance();
+	//proc_info->PrintWhiteListedAddr();
+
 	CLOSELOG();
 	Config::getInstance()->closeReportFile();
 
+	
 }
 
 
@@ -61,6 +68,7 @@ void imageLoadCallback(IMG img,void *){
 	Section item;
 	static int va_hooked = 0;
 	ProcInfo *proc_info = ProcInfo::getInstance();
+	FilterHandler *filterHandler = FilterHandler::getInstance();
 
 	//get the initial entropy of the PE
 	//we have to consder only the main executable and avìvoid the libraries
@@ -95,7 +103,7 @@ void imageLoadCallback(IMG img,void *){
 	
 	if(!IMG_IsMainExecutable(img)){	
 		
-		if(IMG_Name(img).find("ntdll")!= std::string::npos){
+		if(name.find("ntdll")!= std::string::npos){
 		
 		  for( SEC sec= IMG_SecHead(img); SEC_Valid(sec); sec = SEC_Next(sec) ){
 
@@ -111,6 +119,10 @@ void imageLoadCallback(IMG img,void *){
 		
 		proc_info->addLibrary(name,startAddr,endAddr);
 
+		if(filterHandler->IsNameInFilteredArray(name)){
+			filterHandler->addToFilteredLibrary(name,startAddr,endAddr);
+			MYINFO("Added to the filtered array the module %s\n" , name);
+		}
 	}
 }
 
@@ -167,13 +179,12 @@ void initDebug(){
 /* ===================================================================== */
 
 int main(int argc, char * argv[]){
+
 	//If we want to debug the program manually setup the proper options in order to attach an external debugger
 	if(Config::ATTACH_DEBUGGER){
 		initDebug();
 	}
 
-	MYINFO("Strating prototype ins");
-		//W::DebugBreak();
 	FilterHandler *filterH = FilterHandler::getInstance();
 	//set the filters for the libraries
 	MYINFO("%s",Config::FILTER_WRITES_ENABLES.c_str());
