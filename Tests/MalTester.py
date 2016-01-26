@@ -3,12 +3,13 @@ from os import listdir, rename
 import subprocess
 import time
 import sys
+import shutil
 
 '''
 To use this script:
   1) Put the malwares in the malware_folder (E:\Malwares)
   2) Create a work_folder where the malwares will be copied to and run (C:\Users\phate\Desktop\MalwareTests)
-  3)Create a Result folder(test_results) where the results of the unpacking will be saved (C:\Users\phate\Desktop\Results)
+  3)Create a Result folder(test_results) where the results of the unpacking will be saved (E:\Results)
   4) Run the tool from the pin directory to avoid Scyllax86.dll problem (dll not found) python C:\Users\phate\MalTester.py
 
 '''
@@ -18,7 +19,7 @@ work_folder = "C:\\Users\\phate\\Desktop\\MalwareTests\\"
 pin_executable = "C:\\pin\\pin.exe "
 pin_tool ="C:\\pin\\FindOEPPin.dll"
 pin_results = "C:\\pin\\PinUnpackerResults\\"
-test_results = "C:\\Users\\phate\\Desktop\\Results\\"
+test_results = "E:\\Results\\"
 
 def getCurrentMalware():
   #get the list of malwares to analize
@@ -64,14 +65,16 @@ def moveResults(cur_malware):
   print("malware folder "+ cur_mal_folder)
   test_res_dir = join(test_results,cur_mal_folder)
   print("Moving result directory from %s to %s "%(pin_res_dir,test_res_dir))
-  rename(pin_res_dir,test_res_dir)
+  shutil.move(pin_res_dir,test_res_dir)
 
+def main():
+  cur_malware = getCurrentMalware()
+  if cur_malware != None:  
+    executePin(cur_malware)
+    malware_name = cur_malware.split("\\")[-1]
+    moveResults(malware_name)
 
-cur_malware = getCurrentMalware()
-if cur_malware != None:  
-  executePin(cur_malware)
-  malware_name = cur_malware.split("\\")[-1]
-  moveResults(malware_name)
+main()
 
 
   
