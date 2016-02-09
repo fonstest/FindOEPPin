@@ -11,7 +11,9 @@ ToolHider::ToolHider(void)
 ToolHider::~ToolHider(void)
 {
 }
-
+void handlePrivilegedInstr(CONTEXT *ctxt) {
+	PIN_SetContextReg(ctxt, REG_EAX, 0x00402569);	
+}
 
 ADDRINT handleRead(ADDRINT eip, ADDRINT read_addr,void *fake_mem_h){
 	
@@ -73,6 +75,15 @@ void ToolHider::avoidEvasion(INS ins){
    Config *config = Config::getInstance();
    FilterHandler *filterHandler = FilterHandler::getInstance();
 
+   if ((!INS_Disassemble(ins).compare(0, 3, "out") || !INS_Disassemble(ins).compare(0, 2, "in")) && INS_Disassemble(ins).compare(0,3, "inc")) {
+		INS_Delete(ins);
+		INS prev_instr = ProcInfo::getInstance()->getPrevInstr();
+		REGSET regsIn;
+		REGSET_AddAll(regsIn);
+		REGSET regsOut;
+		REGSET_AddAll(regsOut);
+		INS_InsertCall(prev_instr, IPOINT_AFTER, AFUNPTR(handlePrivilegedInstr), IARG_PARTIAL_CONTEXT, &regsIn, &regsOut, IARG_END);
+   }
 	//Filter instructions inside a known library (only graphic dll)
     //  pInfo->isKnownLibraryInstruction(curEip) 
    if(filterHandler->isFilteredLibraryInstruction(curEip)){

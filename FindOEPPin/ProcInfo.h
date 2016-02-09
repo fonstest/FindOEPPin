@@ -91,7 +91,7 @@ public:
 	ADDRINT getPINVMStart();
 	ADDRINT getPINVMEnd();
 	std::vector<HeapZone> getHeapMap();
-	
+	INS getPrevInstr();
 
 	/* setter */
 	void addProcAddresses();
@@ -103,6 +103,7 @@ public:
 	void setProcName(string name);
 	void setStartTimer(clock_t t);
 	void setMainIMGAddress(ADDRINT startAddress,ADDRINT endAddr);
+	void setPrevInstr(INS prev_ins);
 	
 	/* debug */
 	void PrintStartContext();
@@ -170,6 +171,7 @@ private:
 	ProcInfo::ProcInfo();
 	ADDRINT first_instruction;
 	ADDRINT prev_ip;
+	INS prev_ins;
 	
 
 	std::vector<MemoryRange>  stacks;				//Set of Stack one for each thread

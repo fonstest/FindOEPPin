@@ -44,11 +44,9 @@ void ProcInfo::setPushadFlag(BOOL flag){
 	this->pushad_flag = flag;
 }
 
-
 void ProcInfo::setPopadFlag(BOOL flag){
 	this->popad_flag = flag;
 }
-
 
 void ProcInfo::setProcName(string name){
 	this->full_proc_name = name;
@@ -68,6 +66,9 @@ void ProcInfo::setStartTimer(clock_t t){
 }
 
 
+void ProcInfo::setPrevInstr(INS prev_ins){
+	this->prev_ins = prev_ins;
+}
 
 
 /* ----------------------------- GETTER -----------------------------*/
@@ -117,7 +118,9 @@ std::vector<HeapZone> ProcInfo::getHeapMap(){
 	return this->HeapMap;
 }
 
-
+INS ProcInfo::getPrevInstr(){
+	return this->prev_ins;
+}
 
 
 /* ----------------------------- UTILS -----------------------------*/
