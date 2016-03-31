@@ -78,6 +78,7 @@ UINT32 OepFinder::IsCurrentInOEP(INS ins){
 	UINT32 writeItemIndex=-1;
 	ADDRINT curEip = INS_Address(ins);
 	ADDRINT prev_ip = proc_info->getPrevIp();
+
 	//check if current instruction is a write
 	if(wxorxHandler->isWriteINS(ins)){
 		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)handleWrite, IARG_INST_PTR, IARG_MEMORYWRITE_EA, IARG_MEMORYWRITE_SIZE, IARG_PTR, this->wxorxHandler, IARG_END);
@@ -122,8 +123,7 @@ UINT32 OepFinder::IsCurrentInOEP(INS ins){
 		}
 		proc_info->setPrevIp(INS_Address(ins));
 	}
-	//update the previous IP
-	proc_info->setPrevIp(INS_Address(ins));
+
 	return OEPFINDER_NOT_WXORX_INST;
 }
 

@@ -151,6 +151,10 @@ public:
 	VOID enumerateDebugProcessMemory();
 	BOOL getMemoryRange(ADDRINT address, MemoryRange& range);	
 	BOOL addProcessHeapsAndCheckAddress(ADDRINT address);
+	ADDRINT getOldFpuip();
+	VOID setOldFpuip(ADDRINT fpuip_value);
+	ADDRINT getLastFloatInsEip();
+	VOID setLastFloatInsEip(ADDRINT eip_value);
 
 private:
 	static ProcInfo* instance;
@@ -179,6 +183,8 @@ private:
 	string full_proc_name;
 	string proc_name;
 	clock_t start_timer;
+	ADDRINT old_fpuip;
+	ADDRINT last_floating_ins_eip;
 	//processes to be monitored set 
 	std::unordered_set<string> interresting_processes_name; 
 	std::unordered_set<unsigned int> interresting_processes_pid;  

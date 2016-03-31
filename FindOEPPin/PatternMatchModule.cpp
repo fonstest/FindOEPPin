@@ -13,12 +13,44 @@ VOID patchInt2e(ADDRINT ip, CONTEXT *ctxt, ADDRINT cur_eip ){
 VOID patchFsave(ADDRINT ip, CONTEXT *ctxt, ADDRINT cur_eip ){
 	//set the return value of the int2e (stored in edx) as the current ip
 	FPSTATE a;
+	ProcInfo *pInfo = ProcInfo::getInstance();
 	//get the current fp unit state
 	PIN_GetContextFPState(ctxt, &a);
+
+	
 	//set the correct ip and save the state
-	a.fxsave_legacy._fpuip = cur_eip;
+	a.fxsave_legacy._fpuip = pInfo->getLastFloatInsEip();
+
 	PIN_SetContextFPState(ctxt, &a);
 } 
+
+
+VOID CheckFloatingPointContext(CONTEXT *ctxt){
+
+	ProcInfo *pInfo = ProcInfo::getInstance();	
+	FPSTATE a;
+
+
+	PIN_GetContextFPState(ctxt, &a);
+	
+	ADDRINT current_fpuip = a.fxsave_legacy._fpuip;
+	ADDRINT old_fpuip = pInfo->getOldFpuip();
+
+	MYINFO("FPUIP VALUE: %08x\n", current_fpuip);
+	
+	if ( old_fpuip == -1 ){
+		pInfo->setOldFpuip(a.fxsave_legacy._fpuip); // first time set the value 
+	} else {
+		if( old_fpuip != current_fpuip ){  // if the fpuip value is different than the old one 
+			pInfo->setLastFloatInsEip(pInfo->getPrevIp());  // this means that the previous instruction has changed it and so we are going to save 
+															// the eip of the previous instruction as the LastFloatInsEip 
+
+			pInfo->setOldFpuip(current_fpuip);				// also set the old fpuip with the new value 
+		}
+	}
+
+	
+}
 
 //fake the result of an rdtsc operation by dividing it by RDTSC_DIVISOR
 VOID patchRtdsc(ADDRINT ip, CONTEXT *ctxt, ADDRINT cur_eip ){
@@ -49,7 +81,10 @@ PatternMatchModule::PatternMatchModule(void)
 	//ex : if i find an int 2e instruction we have the functon pointer for the right patch 
 	this->patchesMap.insert( std::pair<string,AFUNPTR>("int 0x2e",(AFUNPTR)patchInt2e) );
 	this->patchesMap.insert( std::pair<string,AFUNPTR>("fsave",(AFUNPTR)patchFsave) );
-	this->patchesMap.insert( std::pair<string,AFUNPTR>("rdtsc ",(AFUNPTR)patchRtdsc) );		
+	this->patchesMap.insert( std::pair<string,AFUNPTR>("rdtsc ",(AFUNPTR)patchRtdsc) );	
+
+	this->old_fpuip = -1;
+	this->old_eip = -1;
 }
 
 
@@ -68,7 +103,7 @@ bool PatternMatchModule::patchDispatcher(INS ins, ADDRINT curEip){
 		REGSET regsOut;
 		REGSET_AddAll(regsOut);
 		//add the analysis rtoutine (the patch)
-		INS_InsertCall(ins, IPOINT_BEFORE, this->curPatchPointer, IARG_INST_PTR, IARG_PARTIAL_CONTEXT, &regsIn, &regsOut, IARG_ADDRINT, curEip, IARG_END);
+		INS_InsertCall(ins, IPOINT_BEFORE, this->curPatchPointer, IARG_PARTIAL_CONTEXT, &regsIn, &regsOut, IARG_ADDRINT, curEip, IARG_END);
 		//invalidate the function pointer for the next round
 		this->curPatchPointer = 0x0;
 		return true;
@@ -76,6 +111,14 @@ bool PatternMatchModule::patchDispatcher(INS ins, ADDRINT curEip){
 	//disasseble the instruction
 	std::string disass_instr = INS_Disassemble(ins);
 	//if we find an fsave instruction or similar we have to patch it immediately
+
+	// let's check if the floating point context is changed or not 
+	REGSET regsIn;
+	REGSET_AddAll(regsIn);
+	REGSET regsOut;
+	REGSET_AddAll(regsOut);
+	INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)CheckFloatingPointContext, IARG_PARTIAL_CONTEXT, &regsIn, &regsOut, IARG_END);
+
 	std::regex rx("^f(.*)[save|env](.*)");	
 	if (std::regex_match(disass_instr.cbegin(), disass_instr.cend(), rx)){
 		//all the register in the context can be modified

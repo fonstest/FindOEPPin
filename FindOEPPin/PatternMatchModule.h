@@ -20,5 +20,8 @@ public:
 private:
 	std::map<string, AFUNPTR> patchesMap;
 	AFUNPTR curPatchPointer;
+	ADDRINT old_eip;
+	ADDRINT old_fpuip;
+	
 };
 

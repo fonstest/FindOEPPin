@@ -133,6 +133,7 @@ void imageLoadCallback(IMG img,void *){
 
 // trigger the instrumentation routine for each instruction
 void Instruction(INS ins,void *v){
+
 	// check the current mode of operation
 	Config *config = Config::getInstance();
 	if(config->ANTIEVASION_MODE){
@@ -142,6 +143,9 @@ void Instruction(INS ins,void *v){
 	if(config->UNPACKING_MODE){
 		oepf.IsCurrentInOEP(ins);
 	}	
+
+	//update the previous IP
+	proc_info->setPrevIp(INS_Address(ins));
 }
 
 // trigger the instrumentation routine for each trace collected (useful in order to spiot polymorphic code on the current trace)

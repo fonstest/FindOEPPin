@@ -60,6 +60,7 @@ VOID KillObsidiumDeadPath(CONTEXT *ctxt){
 }
 
 void PINshield::avoidEvasion(INS ins){
+
 	ADDRINT curEip = INS_Address(ins);
 	ProcInfo *pInfo = ProcInfo::getInstance();
 	Config *config = Config::getInstance();

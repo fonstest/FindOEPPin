@@ -20,6 +20,8 @@ ProcInfo::ProcInfo()
 	this->interresting_processes_name.insert("pin.exe");
 	this->interresting_processes_name.insert("csrss.exe");
 	this->retrieveInterestingPidFromNames();
+	this->last_floating_ins_eip = -1;
+	this->old_fpuip = -1;
 }
 
 ProcInfo::~ProcInfo(void)
@@ -60,6 +62,14 @@ void ProcInfo::setInitialEntropy(float Entropy){
 
 void ProcInfo::setStartTimer(clock_t t){
 	this->start_timer = t;
+}
+
+VOID ProcInfo::setOldFpuip(ADDRINT fpuip_value){
+	this->old_fpuip = fpuip_value;
+}
+
+VOID ProcInfo::setLastFloatInsEip(ADDRINT eip_value){
+	this->last_floating_ins_eip = eip_value;
 }
 
 
@@ -110,7 +120,15 @@ std::vector<HeapZone> ProcInfo::getHeapMap(){
 	return this->HeapMap;
 }
 
+ADDRINT ProcInfo::getOldFpuip(){
+	return this->old_fpuip;
+}
 
+
+ADDRINT ProcInfo::getLastFloatInsEip(){
+	return this->last_floating_ins_eip;
+
+}
 /* ----------------------------- UTILS -----------------------------*/
 
 // print the sections information in a fancy way

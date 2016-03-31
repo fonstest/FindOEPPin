@@ -136,9 +136,6 @@
     <ClInclude Include="InitFunctionCallHeuristic.h">
       <Filter>Header Files\PINdemonium\OEP-Heuristics</Filter>
     </ClInclude>
-    <ClInclude Include="ProcInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GdbDebugger.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
@@ -186,6 +183,9 @@
     </ClInclude>
     <ClInclude Include="PINshield.h">
       <Filter>Header Files\PinShield</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcInfo.h">
+      <Filter>Header Files\Helpers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
