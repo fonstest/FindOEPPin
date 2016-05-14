@@ -16,8 +16,7 @@ namespace W{
 
 #define MAX_STACK_SIZE 0x100000    //Used to define the memory range of the stack
 #define TEB_SIZE 0xfe0 	
-#define KUSER_SHARED_DATA_ADDRESS 0x7ffe0000
-#define KUSER_SHARED_DATA_SIZE 0x3e0 
+
 
 typedef struct PEB {
 	W::BYTE padding1[2];
@@ -81,7 +80,6 @@ public:
 	ADDRINT getFirstINSaddress();
 	ADDRINT getPrevIp();
 	std::vector<Section> getSections();
-	std::vector<Section> getProtectedSections();
 	float getInitialEntropy();
 	BOOL getPushadFlag();
 	BOOL getPopadFlag();
@@ -94,7 +92,6 @@ public:
 	
 
 	/* setter */
-	void addProcAddresses();
 	void setFirstINSaddress(ADDRINT address);
 	void setPrevIp(ADDRINT ip);
 	void setInitialEntropy(float Entropy);
@@ -122,44 +119,28 @@ public:
 	void insertInJmpBlacklist(ADDRINT ip);
 	BOOL isInsideJmpBlacklist(ADDRINT ip);
 	BOOL isInsideMainIMG(ADDRINT address);
-	BOOL isInterestingProcess(unsigned int pid);
 	//PEB
 	BOOL isPebAddress(ADDRINT addr);
+	VOID addPebAddress();
 	//TEB
 	BOOL isTebAddress(ADDRINT addr);
 	VOID addThreadTebAddress();
 	//Stack
 	BOOL isStackAddress(ADDRINT addr);
 	VOID addThreadStackAddress(ADDRINT addr);
-	//Memory Mapped Files
-	BOOL isMappedFileAddress(ADDRINT addr);
-	VOID addMappedFilesAddress(ADDRINT startAddr);
-	VOID setCurrentMappedFiles();
-	VOID printMappedFileAddress();
 	//Library
 	BOOL isLibraryInstruction(ADDRINT address);
 	BOOL isKnownLibraryInstruction(ADDRINT address);
-	BOOL isInsideProtectedSection(ADDRINT address);
 	VOID addLibrary(const string name,ADDRINT startAddr,ADDRINT endAddr);
 	BOOL isLibItemDuplicate(UINT32 address , std::vector<LibraryItem> Libraries);
-	VOID addProtectedSection(ADDRINT startAddr,ADDRINT endAddr);
-	//Generic Address (pContexData, SharedMemory..)
-	BOOL isGenericMemoryAddress(ADDRINT address);
-	//Whitelist Memory
-	BOOL isAddrInWhiteList(ADDRINT address);
-	VOID enumerateWhiteListMemory();
-	VOID enumerateCurrentMemory();
-	VOID PrintCurrentMemorydAddr();
-	VOID PrintWhiteListedAddr();
-	VOID PrintDebugProcessAddr();
-	VOID enumerateDebugProcessMemory();
+
 	BOOL getMemoryRange(ADDRINT address, MemoryRange& range);
 
 	
 	//Debug
 	void printHeapList();
 	void PrintAllMemory();
-	BOOL addProcessHeapsAndCheckAddress(ADDRINT address);
+
 
 	
 
@@ -176,19 +157,13 @@ private:
 	MemoryRange mainImg;
 	std::vector<MemoryRange> tebs;                                //Teb Base Address
 	PEB *peb;
-	std::vector<MemoryRange>  mappedFiles;
-	std::vector<MemoryRange>  genericMemoryRanges;
-	std::vector<MemoryRange>  whiteListMemory;
-	std::vector<MemoryRange>  currentMemory;
 	
 	std::vector<Section> Sections;
 	std::vector<HeapZone> HeapMap;
 	std::unordered_set<ADDRINT> addr_jmp_blacklist;
 	std::vector<LibraryItem> knownLibraries;			//vector of know library loaded
 	std::vector<LibraryItem> unknownLibraries;			//vector of unknow library loaded	
-	std::vector<Section> protected_section;			//vector of protected section ( for example the .text of ntdll is protected ( write on these memory range are redirected to other heap's zone ) )
 	
-
 
 	float InitialEntropy;
 	//track if we found a pushad followed by a popad
@@ -198,11 +173,6 @@ private:
 	string full_proc_name;
 	string proc_name;
 	clock_t start_timer;
-	//processes to be monitored set 
-	std::unordered_set<string> interresting_processes_name; 
-	std::unordered_set<unsigned int> interresting_processes_pid;  
-
-	void retrieveInterestingPidFromNames();
 	
 	//Enumerate Whitelisted Memory Helpers	
 	//return the MemoryRange in which the address is mapped
@@ -212,13 +182,7 @@ private:
 	VOID mergeCurrentMemory();
 	
 	BOOL isKnownLibrary(const string name,ADDRINT startAddr,ADDRINT endAddr);
-	VOID addPebAddress();
-	VOID addContextDataAddress();
-	VOID addSharedMemoryAddress();
-	VOID addCodePageDataAddress();
-	VOID addpShimDataAddress();
-	VOID addpApiSetMapAddress();
-	VOID addKUserSharedDataAddress();
+	
 
 
 	//Enumerate current  Memory Helpers

@@ -219,6 +219,9 @@ BOOL OepFinder::analysis(WriteInterval item, INS ins, ADDRINT prev_ip, ADDRINT c
 	*/
 
 	UINT32 error = Heuristics::initFunctionCallHeuristic(curEip,&item);
+	MYINFO("Calling YARA");
+	Heuristics::yaraHeuristic();
+	MYINFO("Finished YARA");
 
 	if( item.getHeapFlag() && dumpAndFixResult != SCYLLA_ERROR_FILE_FROM_PID  && dumpAndFixResult != SCYLLA_ERROR_DUMP ){
 

@@ -26,3 +26,9 @@ UINT32 Heuristics::pushadPopadHeuristic(){
 	return heu.run();
 
 }
+
+UINT32 Heuristics::yaraHeuristic(){
+	YaraHeuristic heu = YaraHeuristic();
+	return heu.run();
+
+}

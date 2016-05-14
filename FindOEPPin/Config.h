@@ -27,6 +27,7 @@ public:
 	string getBasePath();
 	string getCurrentDumpFilePath();
 	string getCurrentDetectedListPath();
+	string getYaraResultPath();
 	string getNotWorkingPath();
 	long double getDumpNumber();
 
@@ -61,11 +62,6 @@ public:
 	
 
 	//mode of operation
-    bool UNPACKING_MODE;
-    bool ANTIEVASION_MODE;
-	bool ANTIEVASION_MODE_INS_PATCHING;
-	bool ANTIEVASION_MODE_SREAD;
-	bool ANTIEVASION_MODE_SWRITE;
 	bool ADVANCED_IAT_FIX;
 	bool POLYMORPHIC_CODE_PATCH;
 
@@ -90,6 +86,7 @@ private:
 	string not_working_path;
 	string cur_dump_path;        //Path of the final (IAT fixed) Dump
 	string cur_list_path;		 //Path of the list of the detected function
+	string cur_yara_res_path;
 	long double dump_number;
 	string getCurDateAndTime();
 	int numberOfBadImports;

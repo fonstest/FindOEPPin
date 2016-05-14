@@ -25,9 +25,6 @@
     <Filter Include="Source Files\Unpacker">
       <UniqueIdentifier>{d44ca324-388e-4cc3-a1c6-c611bde6f446}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\PinShield">
-      <UniqueIdentifier>{6177bbce-1d6f-4b58-9b03-42e074a74cfd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Unpacker\OEP-Heuristics">
       <UniqueIdentifier>{c82c1b21-c180-4abf-a4a2-b65a03c90ba4}</UniqueIdentifier>
     </Filter>
@@ -36,9 +33,6 @@
     </Filter>
     <Filter Include="Header Files\Unpacker">
       <UniqueIdentifier>{e8c75c99-4367-48cf-ac32-a152bc7be725}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\PinShield">
-      <UniqueIdentifier>{4cd742f9-ea1b-4a2c-a515-d5dbcefcca74}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Unpacker\OEP-Heuristics">
       <UniqueIdentifier>{35aa198c-b8a2-4e0a-98e9-1ac38d9d7aa3}</UniqueIdentifier>
@@ -81,21 +75,6 @@
     <ClCompile Include="HookFunctions.cpp">
       <Filter>Source Files\Hooks</Filter>
     </ClCompile>
-    <ClCompile Include="ToolHider.cpp">
-      <Filter>Source Files\PinShield</Filter>
-    </ClCompile>
-    <ClCompile Include="PolymorphicCodePatches.cpp">
-      <Filter>Source Files\PinShield</Filter>
-    </ClCompile>
-    <ClCompile Include="FakeWriteHandler.cpp">
-      <Filter>Source Files\PinShield</Filter>
-    </ClCompile>
-    <ClCompile Include="FakeMemoryHandler.cpp">
-      <Filter>Source Files\PinShield</Filter>
-    </ClCompile>
-    <ClCompile Include="EvasionPatches.cpp">
-      <Filter>Source Files\PinShield</Filter>
-    </ClCompile>
     <ClCompile Include="FilterHandler.cpp">
       <Filter>Source Files\Helpers</Filter>
     </ClCompile>
@@ -110,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="OepFinder.cpp">
       <Filter>Source Files\Unpacker</Filter>
+    </ClCompile>
+    <ClCompile Include="YaraHeuristic.cpp">
+      <Filter>Source Files\Unpacker\OEP-Heuristics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -148,18 +130,6 @@
     <ClInclude Include="ScyllaWrapperInterface.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="FakeWriteHandler.h">
-      <Filter>Header Files\PinShield</Filter>
-    </ClInclude>
-    <ClInclude Include="FakeMemoryHandler.h">
-      <Filter>Header Files\PinShield</Filter>
-    </ClInclude>
-    <ClInclude Include="EvasionPatches.h">
-      <Filter>Header Files\PinShield</Filter>
-    </ClInclude>
-    <ClInclude Include="PolymorphicCodePatches.h">
-      <Filter>Header Files\PinShield</Filter>
-    </ClInclude>
     <ClInclude Include="Debug.h">
       <Filter>Header Files\Helpers</Filter>
     </ClInclude>
@@ -184,8 +154,8 @@
     <ClInclude Include="WxorXHandler.h">
       <Filter>Header Files\Unpacker</Filter>
     </ClInclude>
-    <ClInclude Include="ToolHider.h">
-      <Filter>Header Files\PinShield</Filter>
+    <ClInclude Include="YaraHeuristic.h">
+      <Filter>Header Files\Unpacker\OEP-Heuristics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

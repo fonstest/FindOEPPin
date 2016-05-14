@@ -6,11 +6,9 @@
 #include <time.h>
 #include  "Debug.h"
 #include "Config.h"
-#include "ToolHider.h"
 #include "FilterHandler.h"
 #include "HookFunctions.h"
 #include "HookSyscalls.h"
-#include "PolymorphicCodePatches.h"
 
 
 namespace W {
@@ -18,12 +16,12 @@ namespace W {
 
 }
 
-ToolHider thider;
+
 OepFinder oepf;
 HookFunctions hookFun;
 clock_t tStart;
 ProcInfo *proc_info = ProcInfo::getInstance();
-PolymorphicCodePatches pcpatcher;
+//PolymorphicCodePatches pcpatcher;
 
 //------------------------------Custom option for our FindOEPpin.dll-------------------------------------------------------------------------
 
@@ -33,23 +31,11 @@ KNOB <UINT32> KnobInterWriteSetAnalysis(KNOB_MODE_WRITEONCE, "pintool",
 KNOB <BOOL> KnobAntiEvasion(KNOB_MODE_WRITEONCE, "pintool",
     "antiev", "false" , "specify if you want or not to activate the anti evasion engine");
 
-KNOB <BOOL> KnobAntiEvasionINSpatcher(KNOB_MODE_WRITEONCE, "pintool",
-    "antiev-ins", "false" , "specify if you want or not to activate the single patching of evasive instruction as int2e, fsave...");
-
-KNOB <BOOL> KnobAntiEvasionSuspiciousRead(KNOB_MODE_WRITEONCE, "pintool",
-    "antiev-sread", "false" , "specify if you want or not to activate the handling of suspicious reads");
-
-KNOB <BOOL> KnobAntiEvasionSuspiciousWrite(KNOB_MODE_WRITEONCE, "pintool",
-    "antiev-swrite", "false" , "specify if you want or not to activate the handling of suspicious writes");
-
-KNOB <BOOL> KnobUnpacking(KNOB_MODE_WRITEONCE, "pintool",
-    "unp", "false" , "specify if you want or not to activate the unpacking engine");
-
 KNOB <BOOL> KnobAdvancedIATFixing(KNOB_MODE_WRITEONCE, "pintool",
     "adv-iatfix", "false" , "specify if you want or not to activate the advanced IAT fix technique");
 
-KNOB <BOOL> KnobPolymorphicCodePatch(KNOB_MODE_WRITEONCE, "pintool",
-    "poly-patch", "false" , "specify if you want or not to activate the patch in order to avoid crash during the instrumentation of polymorphic code");
+//KNOB <BOOL> KnobPolymorphicCodePatch(KNOB_MODE_WRITEONCE, "pintool",
+//    "poly-patch", "false" , "specify if you want or not to activate the patch in order to avoid crash during the instrumentation of polymorphic code");
 
 //------------------------------Custom option for our FindOEPpin.dll-------------------------------------------------------------------------
 
@@ -122,16 +108,6 @@ void imageLoadCallback(IMG img,void *){
 	
 	if(!IMG_IsMainExecutable(img)){	
 		
-		if(name.find("ntdll")!= std::string::npos){
-		
-		  for( SEC sec= IMG_SecHead(img); SEC_Valid(sec); sec = SEC_Next(sec) ){
-
-			if(strcmp(SEC_Name(sec).c_str(),".text")==0){
-				proc_info->addProtectedSection(SEC_Address(sec),SEC_Address(sec)+SEC_Size(sec));
-			}
-	      }
-		}
-
 		//*** If you need to protect other sections of other dll put them here ***
 
 		hookFun.hookDispatcher(img);		
@@ -168,21 +144,15 @@ void Instruction(INS ins,void *v){
 	}
 	*/
 
-	Config *config = Config::getInstance();
-	if(config->ANTIEVASION_MODE){
-		thider.avoidEvasion(ins);
-	}
-	
-	if(config->UNPACKING_MODE){
 		oepf.IsCurrentInOEP(ins);
-	}	
+
 	
 
 }
 
 
 VOID Trace(TRACE trace,void *v){
-	pcpatcher.inspectTrace(trace);
+	//pcpatcher.inspectTrace(trace);
 }
 
 
@@ -208,13 +178,8 @@ void ConfigureTool(){
 	
 	Config *config = Config::getInstance();
 	config->INTER_WRITESET_ANALYSIS_ENABLE = KnobInterWriteSetAnalysis.Value();	
-	config->ANTIEVASION_MODE = KnobAntiEvasion.Value();
-	config->ANTIEVASION_MODE_INS_PATCHING = KnobAntiEvasionINSpatcher.Value();
-	config->ANTIEVASION_MODE_SREAD = KnobAntiEvasionSuspiciousRead.Value();
-	config->ANTIEVASION_MODE_SWRITE = KnobAntiEvasionSuspiciousWrite.Value();
-	config->UNPACKING_MODE = KnobUnpacking.Value();
 	config->ADVANCED_IAT_FIX = KnobAdvancedIATFixing.Value();
-	config->POLYMORPHIC_CODE_PATCH = KnobPolymorphicCodePatch.Value();
+//	config->POLYMORPHIC_CODE_PATCH = KnobPolymorphicCodePatch.Value();
 
 
 	if(KnobInterWriteSetAnalysis.Value() > 1 && KnobInterWriteSetAnalysis.Value() <= Config::MAX_JUMP_INTER_WRITE_SET_ANALYSIS ){
@@ -274,7 +239,7 @@ int main(int argc, char * argv[]){
 	if(Config::getInstance()->POLYMORPHIC_CODE_PATCH){
 		TRACE_AddInstrumentFunction(Trace,0);
 	}
-	proc_info->addProcAddresses();
+	proc_info->addPebAddress();
 
 	//init the hooking system
 	HookSyscalls::enumSyscalls();
