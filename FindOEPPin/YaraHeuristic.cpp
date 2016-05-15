@@ -4,7 +4,7 @@
 
 
 #define YARA_PATH "C:\\pin\\PinUnpackerDependencies\\Yara\\yara32.exe"
-#define YARA_RULES "C:\\pin\\PinUnpackerDependencies\\Yara\\yara_imports.txt"
+#define YARA_RULES "C:\\pin\\PinUnpackerDependencies\\Yara\\yara_rules.yar"
 
 BOOL YaraHeuristic::existFile (std::string name) {
 	if (FILE *file = fopen(name.c_str(), "r")) {
