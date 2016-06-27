@@ -5,7 +5,8 @@ FakeReadHandler::FakeReadHandler(void)
 	pInfo = ProcInfo::getInstance();
 	//Populating the ntdll function patch  table
 	ntdllHooksNamesPatch.insert(std::pair<string,string>("KiUserApcDispatcher","\x8D\x84\x24\xDC\x02\x00\x00"));
-	ntdllHooksNamesPatch.insert(std::pair<string,string>("KiUserCallbackDispatcher","\x64\x8B\x0D\x00\x00\x00\x00"));
+	string KiUserPatch("\x64\x8B\x00\x0D\x00\x00\x00",7);// Trick to be able to insert null bytes
+	ntdllHooksNamesPatch.insert(std::pair<string,string>("KiUserCallbackDispatcher",KiUserPatch));
 	ntdllHooksNamesPatch.insert(std::pair<string,string>("KiUserExceptionDispatcher","\xFC\x8B\x4C\x24\x04"));
 	ntdllHooksNamesPatch.insert(std::pair<string,string>("LdrInitializeThunk","\x8B\xFF\x55\x8B\xEC"));
 
@@ -30,6 +31,7 @@ ADDRINT FakeReadHandler::ntdllFuncPatch(ADDRINT curReadAddr, ADDRINT ntdllFuncAd
 
 
 
+
 VOID FakeReadHandler::initFakeMemory(){	
 	//Hide the ntdll hooks
 	for(map<string,string>::iterator it = ntdllHooksNamesPatch.begin(); it != ntdllHooksNamesPatch.end();++it){
@@ -44,12 +46,8 @@ VOID FakeReadHandler::initFakeMemory(){
 		fakeMemory.push_back(fakeMem);
 		MYINFO("Add FakeMemory ntdll %s addr  %08x -> %08x",funcName,fakeMem.StartAddress,fakeMem.EndAddress);
 	}
-
+	
 }
-
-
-
-
 
 ADDRINT FakeReadHandler::getFakeMemory(ADDRINT address, ADDRINT eip){
 	//Check if address is inside the FakeMemory array (need to modify the result of the read)
@@ -65,6 +63,7 @@ ADDRINT FakeReadHandler::getFakeMemory(ADDRINT address, ADDRINT eip){
 	}
 
 		return address;
+
 	
 }
 

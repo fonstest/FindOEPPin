@@ -45,7 +45,6 @@ static REG GetScratchReg(UINT32 index)
 
 void PINshield::avoidEvasion(INS ins){
 	
-	MYINFO("XXXXXXXXXXXXXXXBXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 	ADDRINT curEip = INS_Address(ins);
 	ProcInfo *pInfo = ProcInfo::getInstance();
 	Config *config = Config::getInstance();
