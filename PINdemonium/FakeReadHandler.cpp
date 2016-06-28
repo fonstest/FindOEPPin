@@ -31,7 +31,7 @@ ADDRINT FakeReadHandler::ntdllFuncPatch(ADDRINT curReadAddr, ADDRINT ntdllFuncAd
 
 
 
-
+//populate FakeMemory Array which contains the FakeMemoryItem 
 VOID FakeReadHandler::initFakeMemory(){	
 	//Hide the ntdll hooks
 	for(map<string,string>::iterator it = ntdllHooksNamesPatch.begin(); it != ntdllHooksNamesPatch.end();++it){
@@ -46,6 +46,7 @@ VOID FakeReadHandler::initFakeMemory(){
 		fakeMemory.push_back(fakeMem);
 		MYINFO("Add FakeMemory ntdll %s addr  %08x -> %08x",funcName,fakeMem.StartAddress,fakeMem.EndAddress);
 	}
+	//add other FakeMemoryItem to the fakeMemory array for handling other cases
 	
 }
 
