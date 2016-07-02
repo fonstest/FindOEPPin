@@ -43,22 +43,17 @@ void ProcInfo::setPopadFlag(BOOL flag){
 }
 
 void ProcInfo::setProcName(string name){
-	ofstream myfile;
-	myfile.open("C:\\pin\\example.txt");
+
 	
 	this->full_proc_name = name;
 	//get the starting position of the last element of the path (the exe name)
 	int pos_exe_name = name.find_last_of("\\");
 	string exe_name = name.substr(pos_exe_name + 1);
-	myfile << exe_name<<"\n";
 	//get the name from the last occurrence of / till the end of the string minus the file extension
 	exe_name = Helper::replace_string(exe_name, " ", "");
-	myfile << "after replace"<<"\n";
-	myfile << exe_name<<"\n";
+
 	this->proc_name =  exe_name.substr(0, exe_name.length() - 4);
-	myfile << "result replace"<<"\n";
-	myfile << exe_name<<"\n";
-	myfile.close();
+
 }
 
 void ProcInfo::setInitialEntropy(float Entropy){
