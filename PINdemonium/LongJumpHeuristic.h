@@ -1,7 +1,5 @@
 #pragma once
 #include "Heuristics.h"
-#include "Report.h"
-#include "ReportLongJump.h"
 
 
 class LongJumpHeuristic

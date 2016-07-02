@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include "pin.H"
 #include "OepFinder.h"
-#include "Report.h"
 #include <time.h>
 #include  "Debug.h"
 #include "Config.h"
@@ -21,6 +20,7 @@ HookFunctions hookFun;
 clock_t tStart;
 ProcInfo *proc_info = ProcInfo::getInstance();
 PolymorphicCodeHandlerModule pcpatcher;
+
 
 //------------------------------Custom option for our FindOEPpin.dll-------------------------------------------------------------------------
 
@@ -51,7 +51,8 @@ VOID Fini(INT32 code, VOID *v){
 	//get the execution time
 	MYINFO("Total execution Time: %.2fs", (double)(clock() - tStart)/CLOCKS_PER_SEC);
 	CLOSELOG();
-	Report::getInstance()->closeReport();
+	Config *config = Config::getInstance();
+	config->closeReportFile();
 }
 
 // - usage 
@@ -83,9 +84,7 @@ void imageLoadCallback(IMG img,void *){
 		MYINFO("----------------------------------------------");
 		float initial_entropy = proc_info->GetEntropy();
 		proc_info->setInitialEntropy(initial_entropy);
-		MYINFO("----------------------------------------------");	
-		//create Report File
-		Report::getInstance()->initializeReport(proc_info->getProcName(),initial_entropy);
+		MYINFO("----------------------------------------------");
 		//retrieve the section of the PE
 		for( SEC sec= IMG_SecHead(img); SEC_Valid(sec); sec = SEC_Next(sec) ){
 			item.name = SEC_Name(sec);
@@ -115,6 +114,7 @@ void imageLoadCallback(IMG img,void *){
 
 // trigger the instrumentation routine for each instruction
 void Instruction(INS ins,void *v){
+		
 		oepf.IsCurrentInOEP(ins);
 }
 
@@ -159,7 +159,7 @@ void ConfigureTool(){
 	//get the selected plugin or return an erro if it doen't exist
 	if(KnobPluginSelector.Value().compare("") != 0){
 		config->CALL_PLUGIN_FLAG = true;
-		config->PLUGIN_FULL_PATH = config->getScyllaPluginsPath() + KnobPluginSelector.Value();
+		config->PLUGIN_FULL_PATH = Config::PINDEMONIUM_PLUGIN_PATH + KnobPluginSelector.Value();
 		W::DWORD fileAttrib = W::GetFileAttributes(config->PLUGIN_FULL_PATH.c_str());
 		//file doesn't exist
 		if(fileAttrib == 0xFFFFFFFF){
@@ -171,8 +171,6 @@ void ConfigureTool(){
 	else{
 		config->CALL_PLUGIN_FLAG = false;
 	}
-	//set filtered write
-	FilterHandler::getInstance()->setFilters(config->getFilteredWrites());
 }
 
 // - if an exception is found returns all the information about it (DEBUG purposes)
@@ -205,16 +203,12 @@ int main(int argc, char * argv[]){
 	IMG_AddInstrumentFunction(imageLoadCallback, 0);
 	PIN_AddFiniFunction(Fini, 0);
 	PIN_AddInternalExceptionHandler(ExceptionHandler,NULL);
-	
 	//get theknob args
 	ConfigureTool();
-	
 	if(Config::getInstance()->POLYMORPHIC_CODE_PATCH){
 		TRACE_AddInstrumentFunction(Trace,0);
 	}
 	proc_info->addProcAddresses();
-
-
 	//init the hooking system
 	HookSyscalls::enumSyscalls();
 	HookSyscalls::initHooks();

@@ -48,7 +48,6 @@ void ProcInfo::setProcName(string name){
 	int pos_exe_name = name.find_last_of("\\");
 	string exe_name = name.substr(pos_exe_name + 1);
 	//get the name from the last occurrence of / till the end of the string minus the file extension
-	exe_name = Helper::replace_string(exe_name, " ", "");
 	this->proc_name =  exe_name.substr(0, exe_name.length() - 4);
 }
 
@@ -108,6 +107,9 @@ std::vector<HeapZone> ProcInfo::getHeapMap(){
 	return this->HeapMap;
 }
 
+unsigned int ProcInfo::getHeapMapSize(){
+	return this->HeapMap.size();
+}
 
 /* ----------------------------- UTILS -----------------------------*/
 
