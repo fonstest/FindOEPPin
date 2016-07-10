@@ -121,6 +121,8 @@ Every time a dump is taken yara is invoked and the rules contained inside **C:\p
 ## Config
 Config file located at C:\pin\PINdemoniumDependencies\config.json contains variables which allow to set the location of the outputs
 
+## Heap
+
 ## Results
 Results are located at **C:\pin\PINdemoniumResults\\< current_date_and_time >\\** and contains:
 - **report_PINdemonium**: Json file which contains the most important information about the unpacking process;
