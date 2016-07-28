@@ -3,7 +3,7 @@
 #include <string>
 
 UINT32 ScyllaDumpAndFix(int pid, int oep, WCHAR * output_file,  WCHAR * cur_path, WCHAR * tmp_dump, WCHAR *reconstructed_imports_file);
-
+BOOL  ScyllaWrapDumpProcessA(DWORD_PTR pid, const char * fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const char * fileResult);
 
 /* 
    Add a new section to a dumped file 

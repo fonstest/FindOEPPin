@@ -4,6 +4,7 @@
 OepFinder::OepFinder(void){
 	this->wxorxHandler = WxorXHandler::getInstance();
 	this->report = Report::getInstance();
+	this->dumpingModule = DumpingModule();
 }
 
 OepFinder::~OepFinder(void){
@@ -121,14 +122,7 @@ UINT32 OepFinder::IsCurrentInOEP(INS ins){
 			Config::getInstance()->setNewWorkingDirectory(false); // create the folder dump_0 inside the folder associated to this timestamp 
 			report->createReportDump(curEip,item->getAddrBegin(),item->getAddrEnd(),Config::getInstance()->getDumpNumber(),false,W::GetCurrentProcessId());
 			int result = 0;
-			if(proc_info->isInsideMainIMG(curEip)){
-				result = this->DumpAndFixIAT(curEip);
-			}else{
-				if(proc_info->isLibraryInstruction(curEip)){
-					result = this->DumpAndFixLibrary(curEip);
-				}
-			}
-		
+			result = this->DumpAndFixIAT(curEip);
 			this->DumpAndCollectHeap(item,curEip,result);
 			Config::getInstance()->setWorking(result);
 			MYPRINT("\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -154,28 +148,6 @@ UINT32 OepFinder::IsCurrentInOEP(INS ins){
 	return OEPFINDER_NOT_WXORX_INST;
 }
 
-
-UINT32 OepFinder::DumpAndFixLibrary(ADDRINT curEip){
-	MYINFO("DumpAndFixLibrary ");
-	LibraryItem* lib = ProcInfo::getInstance()->getLibraryItem(curEip);
-	if (lib == NULL){
-		return -1;
-
-	}
-	string name = lib->name;
-	ADDRINT start_addr = lib->StartAddress;
-	ADDRINT end_addr = lib->EndAddress;
-	UINT32 size_write_set = end_addr - start_addr;
-	MYINFO("detected inside library execution %08x name %s start %08x end %08x size %08x",curEip,name.c_str(),start_addr,end_addr,size_write_set);
-	
-	string outputFile = Config::getInstance()->getWorkingDumpPath();
-		//prepare the buffer to copy inside the stuff into the heap section to dump 		  
-	unsigned char *Buffer = (unsigned char *)malloc( size_write_set );
-		// copy the heap zone into the buffer 
-	PIN_SafeCopy(Buffer , (void const *)start_addr , size_write_set);	
-	return Helper::writeBufferToFile(Buffer,size_write_set,outputFile);
-
-}
 
 void OepFinder::intraWriteSetJMPAnalysis(ADDRINT curEip,ADDRINT prev_ip,INS ins, WriteInterval *item){	
 	MYPRINT("\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -260,11 +232,28 @@ UINT32 OepFinder::DumpAndFixIAT(ADDRINT curEip){
 	string reconstructed_imports_file  = config->getCurrentReconstructedImportsPath();
 	string tmpDump = outputFile + "_dmp";
 	//std::wstring tmpDump_w = std::wstring(tmpDump.begin(), tmpDump.end());
+	
 	string plugin_full_path = config->PLUGIN_FULL_PATH;	
 	MYINFO("Calling scylla with : Current PID %d, Current output file dump %s, Plugin %d",pid, outputFile.c_str(), config->PLUGIN_FULL_PATH.c_str());
+	UINT32 dumped = -1;
+
+	if(ProcInfo::getInstance()->isLibraryInstruction(curEip)){
+		dumped = dumpingModule.DumpLibrary(curEip,tmpDump);
+	}
+	else{
+		dumped = dumpingModule.DumpMainModule(pid,curEip, (char *)tmpDump.c_str());
+	}
+	
+	if(dumped != 0){
+		MYINFO("Failed to dump error %d",dumped);
+		return dumped;
+	}
+	MYINFO("Dumped the program correctly start fixing dump");
+	
+	
 	// -------- Scylla launched as an exe --------	
 	ScyllaWrapperInterface *sc = ScyllaWrapperInterface::getInstance();	
-	UINT32 result = sc->launchScyllaDumpAndFix(pid, curEip, outputFile, tmpDump, config->CALL_PLUGIN_FLAG, config->PLUGIN_FULL_PATH, reconstructed_imports_file);
+	UINT32 result = sc->launchScyllaFix(pid, curEip, outputFile, tmpDump, config->CALL_PLUGIN_FLAG, config->PLUGIN_FULL_PATH, reconstructed_imports_file);
 	if(result != SCYLLA_SUCCESS_FIX){
 		MYERRORE("Scylla execution Failed error %d ",result);
 		return result;

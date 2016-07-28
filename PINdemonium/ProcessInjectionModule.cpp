@@ -26,7 +26,7 @@ BOOL ProcessInjectionModule::isInsideCreateProcess(){
 		remoteWriteInsideCreateProcess++;
 		return true;
 	}
-	else if(remoteWriteInsideCreateProcess & remoteWriteInsideCreateProcess ==3 ){
+	else if(remoteWriteInsideCreateProcess && remoteWriteInsideCreateProcess ==3 ){
 		MYINFO("2. InsideCreateProcess %d   remoteWrite %d",insideCreateProcess,remoteWriteInsideCreateProcess);
 		remoteWriteInsideCreateProcess = 0;
 		insideCreateProcess =false;

@@ -10,6 +10,7 @@
 #include "Report.h"
 #include "md5.h"
 #include "Helper.h"
+#include "DumpingModule.h"
 namespace W {
 	#include <windows.h>
 }
@@ -46,8 +47,9 @@ private:
 	
 	WxorXHandler *wxorxHandler;
 	Report *report;
+	DumpingModule dumpingModule; 
 	UINT32 DumpAndFixIAT(ADDRINT curEip);
-	UINT32 DumpAndFixLibrary(ADDRINT curEip);
+	UINT32 DumpLibrary(ADDRINT curEip);
 	VOID DumpAndCollectHeap(WriteInterval* item, ADDRINT curEip, int dumpAndFixResult);
 };
 

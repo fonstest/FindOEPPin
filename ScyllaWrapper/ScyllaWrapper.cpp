@@ -167,5 +167,9 @@ UINT32 ScyllaWrapAddSection(const WCHAR * dump_path , const CHAR * sectionName, 
 	return ScyllaAddSection(dump_path , sectionName, sectionSize, offset , sectionData);
 }
 
+BOOL  ScyllaWrapDumpProcessA(DWORD_PTR pid, const char * fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const char * fileResult){
+	return ScyllaDumpProcessA(pid,fileToDump,imagebase,entrypoint,fileResult);
+}
+
 
 

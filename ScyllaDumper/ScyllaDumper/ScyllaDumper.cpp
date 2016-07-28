@@ -16,8 +16,6 @@
 
 
 UINT32 IATAutoFix(DWORD pid, DWORD_PTR oep, WCHAR *outputFile, WCHAR* tmpDumpFile, DWORD call_plugin_flag, WCHAR *plugin_full_path, WCHAR *reconstructed_imports_file);
-BOOL GetFilePathFromPID(DWORD dwProcessId, WCHAR *filename);
-DWORD_PTR GetExeModuleBase(DWORD dwProcessId);
 
 
 
@@ -80,30 +78,7 @@ UINT32 IATAutoFix(DWORD pid, DWORD_PTR oep, WCHAR *outputFile, WCHAR *tmpDumpFil
 	DWORD iatSize = 0;
 	WCHAR originalExe[MAX_PATH]; // Path of the original PE which as launched the current process
 
-	//getting the Base Address
-	DWORD_PTR hMod = GetExeModuleBase(pid);
-	if(!hMod){
-		INFO("Can't find PID");
-	}
 	
-	//INFO("GetExeModuleBase %X", hMod);
-
-	//Dumping Process
-	BOOL success = GetFilePathFromPID(pid,originalExe);
-	if(!success){
-		INFO("Error in getting original Path from Pid: %d",pid);
-		return SCYLLA_ERROR_FILE_FROM_PID;
-	}
-	
-	//INFO("Original Exe Path: %S",originalExe);
-		
-	success = ScyllaDumpProcessW(pid,originalExe,hMod,oep,tmpDumpFile);
-	if(!success){
-		INFO("[SCYLLA DUMP] Error Dumping  Pid: %d, FileToDump: %S, Hmod: %X, oep: %X, output: %S ",pid,originalExe,hMod,oep,tmpDumpFile);
-		return SCYLLA_ERROR_DUMP;
-	}
-	INFO("[SCYLLA DUMP] Successfully dumped Pid: %d, FileToDump: %S, Hmod: %X, oep: %X, output: %S ",pid,originalExe,hMod,oep,tmpDumpFile);
-
 	INFO("[SCYLLA DUMP] Now let's search the IAT!\n");
 	INFO("[SCYLLA SEARCH] (1) Trying with the advanced IAT search\n");
 	//Searching the IAT
@@ -166,41 +141,6 @@ UINT32 IATAutoFix(DWORD pid, DWORD_PTR oep, WCHAR *outputFile, WCHAR *tmpDumpFil
 	
 }
 
-/**
-Extract the .EXE file which has lauched the process having PID pid
-**/
-BOOL GetFilePathFromPID(DWORD dwProcessId, WCHAR *filename){
-	
-	HANDLE processHandle = NULL;
 
-	processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwProcessId);
-	if (processHandle) {
-	if (GetModuleFileNameEx(processHandle,NULL, filename, MAX_PATH) == 0) {
-    //if (GetProcessImageFileName(processHandle, filename, MAX_PATH) == 0) {
-		ERRORE("Failed to get module filename.\n");
-		return false;
-	}
-	CloseHandle(processHandle);
-	} else {
-		ERRORE("Failed to open process.\n" );
-		return false;
-	}
-
-	return true;
-	
-}
-
-
-DWORD_PTR GetExeModuleBase(DWORD dwProcessId)
-{
-	MODULEENTRY32 lpModuleEntry = { 0 };
-	HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwProcessId);
-	lpModuleEntry.dwSize = sizeof(lpModuleEntry);
-	Module32First(hSnapShot, &lpModuleEntry);
-
-	CloseHandle(hSnapShot);
-
-	return (DWORD_PTR)lpModuleEntry.modBaseAddr;
-}
 
 

@@ -25,7 +25,7 @@ ScyllaWrapperInterface::ScyllaWrapperInterface(void)
  call_plugin_falg : specify if a plugin has to be called if the iat-fix fails
  plugin_full_path : full path to the dll containing the plugin
 **/
-UINT32 ScyllaWrapperInterface::launchScyllaDumpAndFix(int pid, int curEip, std::string outputFile, std::string tmpDump,  bool call_plugin_flag, std::string plugin_full_path, std::string reconstructed_imports_file){	
+UINT32 ScyllaWrapperInterface::launchScyllaFix(int pid, int curEip, std::string outputFile, std::string tmpDump,  bool call_plugin_flag, std::string plugin_full_path, std::string reconstructed_imports_file){	
 	std::string scylla = config->getScyllaDumperPath();
 	W::DWORD exitCode;
 	//Creating the string containing the arguments to pass to the ScyllaTest.exe
@@ -55,7 +55,7 @@ UINT32 ScyllaWrapperInterface::launchScyllaDumpAndFix(int pid, int curEip, std::
 	W::CloseHandle(pi.hThread);
 
 	if(!Helper::existFile(outputFile)){
-		MYERRORE("Scylla Can't dump the process");
+		MYERRORE("Scylla couldn't reconstruct import directory");
 		return exitCode;
 	}
 	if(Helper::existFile(reconstructed_imports_file)){//exist file containing imported functions
@@ -113,8 +113,10 @@ void ScyllaWrapperInterface::loadScyllaLibary(){
 	//get proc address
 	if (this->hScyllaWrapper)
 	{
-		this->ScyllaDumpAndFix = (def_ScyllaDumpAndFix)W::GetProcAddress((W::HMODULE)this->hScyllaWrapper, "ScyllaDumpAndFix");
+		this->ScyllaDumpProcessA = (def_ScyllaDumpProcessA)W::GetProcAddress((W::HMODULE)this->hScyllaWrapper, "ScyllaWrapDumpProcessA");
+
 		this->ScyllaWrapAddSection = (def_ScyllaWrapAddSection)W::GetProcAddress((W::HMODULE)this->hScyllaWrapper, "ScyllaWrapAddSection");
+				printf(" ScyllaDumpProcessA %08x  ScyllaWrapAddSection %08x",this->ScyllaDumpProcessA,this->ScyllaWrapAddSection);
 	}
 }
 

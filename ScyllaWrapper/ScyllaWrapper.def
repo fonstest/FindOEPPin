@@ -1,4 +1,5 @@
 EXPORTS
    ScyllaDumpAndFix		@1
    ScyllaWrapAddSection @2
+   ScyllaWrapDumpProcessA   @3
 

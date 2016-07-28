@@ -142,7 +142,7 @@ BOOL WINAPI ScyllaDumpCurrentProcessA(const char * fileToDump, DWORD_PTR imageba
 }
 
 BOOL WINAPI ScyllaDumpProcessA(DWORD_PTR pid, const char * fileToDump, DWORD_PTR imagebase, DWORD_PTR entrypoint, const char * fileResult)
-{
+{	printf("ScyllaDumpProcessA ScyllaDumpProcessA ScyllaDumpProcessA");
 	WCHAR fileToDumpW[MAX_PATH];
 	WCHAR fileResultW[MAX_PATH];
 

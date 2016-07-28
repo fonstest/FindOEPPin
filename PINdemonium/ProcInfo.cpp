@@ -335,9 +335,7 @@ LibraryItem* ProcInfo::getLibraryItem(ADDRINT address){
 	//check inside unknown libraries
 	for(std::vector<LibraryItem>::iterator lib = unknownLibraries.begin(); lib != unknownLibraries.end(); lib++) {
 		if (lib->StartAddress <= address && address <= lib->EndAddress){
-			MYINFO("FOUND unknown lib %s %08x %08x",lib->name.c_str(),lib->StartAddress,lib->EndAddress);
 			LibraryItem* mylib =  &(*lib);   
-			MYINFO("After unknown lib %s %08x %08x",mylib->name.c_str(),mylib->StartAddress,mylib->EndAddress);
 			return  &(*lib);
 		}
 	}
