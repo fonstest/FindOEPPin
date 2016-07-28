@@ -120,7 +120,15 @@ UINT32 OepFinder::IsCurrentInOEP(INS ins){
 			MYINFO("Current EIP %08x",curEip);
 			Config::getInstance()->setNewWorkingDirectory(false); // create the folder dump_0 inside the folder associated to this timestamp 
 			report->createReportDump(curEip,item->getAddrBegin(),item->getAddrEnd(),Config::getInstance()->getDumpNumber(),false,W::GetCurrentProcessId());
-			int result = this->DumpAndFixIAT(curEip);
+			int result = 0;
+			if(proc_info->isInsideMainIMG(curEip)){
+				result = this->DumpAndFixIAT(curEip);
+			}else{
+				if(proc_info->isLibraryInstruction(curEip)){
+					result = this->DumpAndFixLibrary(curEip);
+				}
+			}
+		
 			this->DumpAndCollectHeap(item,curEip,result);
 			Config::getInstance()->setWorking(result);
 			MYPRINT("\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
@@ -146,6 +154,28 @@ UINT32 OepFinder::IsCurrentInOEP(INS ins){
 	return OEPFINDER_NOT_WXORX_INST;
 }
 
+
+UINT32 OepFinder::DumpAndFixLibrary(ADDRINT curEip){
+	MYINFO("DumpAndFixLibrary ");
+	LibraryItem* lib = ProcInfo::getInstance()->getLibraryItem(curEip);
+	if (lib == NULL){
+		return -1;
+
+	}
+	string name = lib->name;
+	ADDRINT start_addr = lib->StartAddress;
+	ADDRINT end_addr = lib->EndAddress;
+	UINT32 size_write_set = end_addr - start_addr;
+	MYINFO("detected inside library execution %08x name %s start %08x end %08x size %08x",curEip,name.c_str(),start_addr,end_addr,size_write_set);
+	
+	string outputFile = Config::getInstance()->getWorkingDumpPath();
+		//prepare the buffer to copy inside the stuff into the heap section to dump 		  
+	unsigned char *Buffer = (unsigned char *)malloc( size_write_set );
+		// copy the heap zone into the buffer 
+	PIN_SafeCopy(Buffer , (void const *)start_addr , size_write_set);	
+	return Helper::writeBufferToFile(Buffer,size_write_set,outputFile);
+
+}
 
 void OepFinder::intraWriteSetJMPAnalysis(ADDRINT curEip,ADDRINT prev_ip,INS ins, WriteInterval *item){	
 	MYPRINT("\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");

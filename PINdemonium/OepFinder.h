@@ -43,9 +43,11 @@ private:
 	VOID saveHeapZones(std::map<std::string , HeapZone> hzs , std::map<std::string,std::string> hzs_dumped);
 	void intraWriteSetJMPAnalysis(ADDRINT curEip,ADDRINT prev_ip,INS ins, WriteInterval *item);
 	void getCurrentDlls();
+	
 	WxorXHandler *wxorxHandler;
 	Report *report;
 	UINT32 DumpAndFixIAT(ADDRINT curEip);
+	UINT32 DumpAndFixLibrary(ADDRINT curEip);
 	VOID DumpAndCollectHeap(WriteInterval* item, ADDRINT curEip, int dumpAndFixResult);
 };
 

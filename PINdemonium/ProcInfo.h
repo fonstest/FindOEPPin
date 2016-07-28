@@ -82,6 +82,7 @@ public:
 	//distruptor
 	~ProcInfo(void);
 	/* getter */
+	LibraryItem* getLibraryItem(ADDRINT address);
 	ADDRINT getFirstINSaddress();
 	ADDRINT getPrevIp();
 	std::vector<Section> getSections();

@@ -322,6 +322,28 @@ BOOL ProcInfo::isLibraryInstruction(ADDRINT address){
 	return FALSE;	
 }
 
+
+/*check if the address belong to a Library */
+//TODO add a whiitelist of Windows libraries that will be loaded
+LibraryItem* ProcInfo::getLibraryItem(ADDRINT address){	 
+	//check inside known libraries
+	for(std::vector<LibraryItem>::iterator lib = knownLibraries.begin(); lib != knownLibraries.end(); ++lib) {
+		if (lib->StartAddress <= address && address <= lib->EndAddress){
+		return &(*lib);
+		}
+	}
+	//check inside unknown libraries
+	for(std::vector<LibraryItem>::iterator lib = unknownLibraries.begin(); lib != unknownLibraries.end(); lib++) {
+		if (lib->StartAddress <= address && address <= lib->EndAddress){
+			MYINFO("FOUND unknown lib %s %08x %08x",lib->name.c_str(),lib->StartAddress,lib->EndAddress);
+			LibraryItem* mylib =  &(*lib);   
+			MYINFO("After unknown lib %s %08x %08x",mylib->name.c_str(),mylib->StartAddress,mylib->EndAddress);
+			return  &(*lib);
+		}
+	}
+	return NULL;	
+}
+
 BOOL ProcInfo::isKnownLibraryInstruction(ADDRINT address){
 	//check inside known libraries
 	for(std::vector<LibraryItem>::iterator lib = knownLibraries.begin(); lib != knownLibraries.end(); ++lib) {
